@@ -1,36 +1,83 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Task SaaS - Frontend
 
-## Getting Started
+Aplicación SaaS para gestión de tareas construida con Next.js 16, React 19 y TypeScript.
 
-First, run the development server:
+## 🚀 Inicio Rápido
+
+### Instalación
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Desarrollo
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+pnpm dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Abre [http://localhost:3000](http://localhost:3000) en tu navegador.
 
-## Learn More
+### Compilación para Producción
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+pnpm build
+pnpm start
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 📁 Estructura del Proyecto
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+task_saas/
+├── src/
+│   ├── app/              # App Router de Next.js
+│   │   ├── layout.tsx    # Layout principal
+│   │   ├── page.tsx      # Página de inicio
+│   │   └── globals.css   # Estilos globales
+│   ├── components/       # Componentes reutilizables
+│   ├── hooks/            # Custom React hooks
+│   ├── lib/              # Utilidades y funciones helper
+│   │   └── utils.ts      # Función cn() para clases CSS
+│   └── types/            # Tipos TypeScript compartidos
+├── public/               # Archivos estáticos
+└── ...configs            # Archivos de configuración
+```
 
-## Deploy on Vercel
+## 🛠️ Stack Tecnológico
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **Framework**: Next.js 16 (App Router)
+- **UI**: React 19
+- **Lenguaje**: TypeScript
+- **Estilos**: Tailwind CSS 4
+- **Gestor de Paquetes**: pnpm
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🔧 Configuración
+
+1. Copia `.env.local.example` a `.env.local`
+2. Configura las variables de entorno necesarias
+
+## 📝 Scripts Disponibles
+
+- `pnpm dev` - Inicia el servidor de desarrollo
+- `pnpm build` - Compila la aplicación para producción
+- `pnpm start` - Inicia el servidor de producción
+- `pnpm lint` - Ejecuta el linter
+
+## 🎨 Estilos
+
+Este proyecto usa Tailwind CSS 4. La función helper `cn()` en `src/lib/utils.ts` combina clases de Tailwind de manera eficiente.
+
+```tsx
+import { cn } from "@/lib/utils";
+
+<div className={cn("base-class", condition && "conditional-class")} />;
+```
+
+## 📦 Alias de Importación
+
+El proyecto está configurado con alias `@/*` para imports absolutos:
+
+```tsx
+import { cn } from "@/lib/utils";
+import MyComponent from "@/components/MyComponent";
+```
