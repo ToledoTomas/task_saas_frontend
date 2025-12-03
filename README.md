@@ -56,12 +56,72 @@ task_saas/
 1. Copia `.env.local.example` a `.env.local`
 2. Configura las variables de entorno necesarias
 
+### Autenticación y Backend
+
+La app se integra con un backend (FastAPI) vía cookies httpOnly.
+
+- Variable: `API_URL` (por defecto `http://localhost:8000`)
+- Endpoints usados:
+  - Registro: `POST ${API_URL}/api/v1/auth/register`
+  - Login: `POST ${API_URL}/api/v1/auth/login`
+  - Usuario actual: `GET ${API_URL}/api/v1/auth/me`
+
+La autenticación se gestiona en el servidor y el token se guarda en una cookie `access_token`.
+
+Rutas internas de Next.js para verificación:
+
+- `GET /api/auth/me` — obtiene el usuario desde el backend usando el token
+
+Páginas relevantes del App Router:
+
+- `src/app/components/login.tsx` — envía credenciales a `loginAction` y redirige al dashboard
+- `src/app/dashboard/page.tsx` — obtiene el usuario con `/api/auth/me`
+
 ## 📝 Scripts Disponibles
 
 - `pnpm dev` - Inicia el servidor de desarrollo
 - `pnpm build` - Compila la aplicación para producción
 - `pnpm start` - Inicia el servidor de producción
 - `pnpm lint` - Ejecuta el linter
+
+## 🔐 Flujo de Autenticación
+
+1. Registro
+
+   - El formulario de `register.tsx` envía datos a `registerAction`.
+   - Si el registro es exitoso, se realiza un login automático y se guarda `access_token` en cookies.
+   - Se redirige a `/dashboard`.
+
+2. Login
+
+   - El formulario de `login.tsx` usa `loginAction`, guarda la cookie y redirige a `/dashboard`.
+
+3. Dashboard
+   - `dashboard/page.tsx` consulta `/api/auth/me` para cargar los datos del usuario.
+
+## ▶️ Cómo Probar
+
+1. Levanta el backend en `${API_URL}` (por defecto `http://localhost:8000`).
+2. Arranca el frontend:
+
+```bash
+pnpm dev
+```
+
+3. Registro:
+
+   - Ve a `/register`, completa el formulario.
+   - Deberías ser redirigido automáticamente a `/dashboard`.
+
+4. Login:
+   - Ve a `/login`, ingresa credenciales válidas.
+   - Debe redirigir a `/dashboard`.
+
+Si no redirige, revisa:
+
+- La consola del navegador (logs de "Intentando login/registro")
+- Que el backend exponga los endpoints bajo `/api/v1/auth/*`
+- Que `API_URL` esté correctamente configurado en `.env.local`
 
 ## 🎨 Estilos
 

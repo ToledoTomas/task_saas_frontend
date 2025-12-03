@@ -1,106 +1,79 @@
-"use client";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { logoutAction } from "@/services/action";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import type { User } from "@/services";
+interface UserData {
+  id: number;
+  username: string;
+  email: string;
+  full_name: string;
+}
 
-export default function Dashboard() {
-  const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
+async function getUserData(token: string) {
+  const res = await fetch("http://localhost:8000/api/v1/auth/me", {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    cache: "no-store",
+  });
 
-  useEffect(() => {
-    const raw = localStorage.getItem("user");
-    if (!raw || raw === "undefined") {
-      router.push("/login");
-      return;
-    }
-    try {
-      const parsed: User = JSON.parse(raw);
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setUser(parsed);
-    } catch {
-      localStorage.removeItem("user");
-      localStorage.removeItem("token");
-      router.push("/login");
-    }
-  }, [router]);
+  if (!res.ok) {
+    throw new Error("Token inválido");
+  }
 
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-    router.push("/login");
-  };
+  return res.json() as Promise<UserData>;
+}
 
-  if (!user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p>Cargando...</p>
-      </div>
-    );
+export default async function DashboardPage() {
+  const cookieStore = cookies();
+  const token = (await cookieStore).get("access_token")?.value;
+
+  if (!token) {
+    redirect("/login");
+  }
+
+  let user: UserData | null = null;
+
+  try {
+    user = await getUserData(token);
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    redirect("/login");
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
-          <div className="flex justify-between items-start mb-6">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                ¡Bienvenido, {user.full_name || user.username}!
-              </h1>
-              <p className="text-gray-600 dark:text-gray-400">
-                Tu email: {user.email}
-              </p>
-            </div>
-            <button
-              onClick={handleLogout}
-              className="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
-            >
-              Cerrar Sesión
-            </button>
-          </div>
+    <div className="p-8">
+      <h1 className="text-3xl font-bold mb-4">Dashboard</h1>
 
-          <div className="border-t border-gray-200 dark:border-gray-700 pt-6 mt-6">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-              Información de Usuario
-            </h2>
-            <div className="space-y-3">
-              <div className="flex items-center">
-                <span className="font-medium text-gray-700 dark:text-gray-300 w-32">
-                  ID:
-                </span>
-                <span className="text-gray-900 dark:text-white">{user.id}</span>
-              </div>
-              <div className="flex items-center">
-                <span className="font-medium text-gray-700 dark:text-gray-300 w-32">
-                  Username:
-                </span>
-                <span className="text-gray-900 dark:text-white">
-                  {user.username}
-                </span>
-              </div>
-              {user.full_name && (
-                <div className="flex items-center">
-                  <span className="font-medium text-gray-700 dark:text-gray-300 w-32">
-                    Nombre Completo:
-                  </span>
-                  <span className="text-gray-900 dark:text-white">
-                    {user.full_name}
-                  </span>
-                </div>
-              )}
-              <div className="flex items-center">
-                <span className="font-medium text-gray-700 dark:text-gray-300 w-32">
-                  Email:
-                </span>
-                <span className="text-gray-900 dark:text-white">
-                  {user.email}
-                </span>
-              </div>
-            </div>
-          </div>
+      <div className="bg-white shadow rounded-lg p-6 border border-gray-200">
+        <h2 className="text-xl font-semibold text-gray-800">
+          Bienvenido, {user.full_name || user.username} 👋
+        </h2>
+        <p className="text-gray-600 mt-2">
+          Tu email es:{" "}
+          <span className="font-mono bg-gray-100 p-1 rounded">
+            {user.email}
+          </span>
+        </p>
+
+        <div className="mt-6 p-4 bg-blue-50 text-blue-800 rounded">
+          <p>
+            🔐 <strong>Estado del sistema:</strong> Estás autenticado mediante
+            una cookie HttpOnly segura. El frontend no puede leerla, pero el
+            servidor sí.
+          </p>
         </div>
       </div>
+      <form action={logoutAction}>
+        <button
+          type="submit"
+          className="bg-red-600 text-white p-2 rounded cursor-pointer m-2"
+        >
+          Cerrar Sesión
+        </button>
+      </form>
     </div>
   );
 }
